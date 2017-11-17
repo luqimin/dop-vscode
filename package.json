@@ -2,7 +2,7 @@
     "name": "dophin",
     "displayName": "dop",
     "description": "The way to use dop grafully",
-    "version": "0.0.1",
+    "version": "0.5.1",
     "repository": {
         "type": "git",
         "url": "https://github.com/luqimin/dop-vscode"
@@ -11,43 +11,85 @@
     "engines": {
         "vscode": "^1.0.0"
     },
+    "icon": "icon.png",
     "categories": [
         "Other"
     ],
     "activationEvents": [
+        "onCommand:extension.dopFormat",
         "onCommand:extension.dopServer",
         "onCommand:extension.dopCompile",
         "onCommand:extension.dopDeploy"
     ],
     "main": "./out/src/extension",
     "contributes": {
-        "commands": [{
+        "commands": [
+            {
+                "command": "extension.dopFormat",
+                "title": "格式化文件 (dop format)",
+                "category": "dophin"
+            },
+            {
                 "command": "extension.dopServer",
-                "title": "dop server: 启动本地服务",
+                "title": "本地服务 (dop server)",
                 "category": "dophin"
             },
             {
                 "command": "extension.dopCompile",
-                "title": "dop compile: 编译静态文件",
+                "title": "编译文件 (dop compile)",
                 "category": "dophin"
             },
             {
                 "command": "extension.dopDeploy",
-                "title": "dop deploy: 部署静态文件",
+                "title": "部署文件 (dop deploy)",
                 "category": "dophin"
             }
         ],
         "menus": {
-            "editor/context": [{
-                "command": "extension.dopServer",
-                "group": "dophin@0"
-            }, {
-                "command": "extension.dopCompile",
-                "group": "dophin@1"
-            }, {
-                "command": "extension.dopDeploy",
-                "group": "dophin@2"
-            }]
+            "commandPalette": [
+                {
+                    "command": "extension.dopFormat",
+                    "when": "resourceLangId == css"
+                }
+            ],
+            "explorer/context": [
+                {
+                    "command": "extension.dopFormat",
+                    "group": "dophin@0",
+                    "when": "resourceLangId == css"
+                },
+                {
+                    "command": "extension.dopServer",
+                    "group": "dophin@1"
+                },
+                {
+                    "command": "extension.dopCompile",
+                    "group": "dophin@2"
+                },
+                {
+                    "command": "extension.dopDeploy",
+                    "group": "dophin@3"
+                }
+            ],
+            "editor/context": [
+                {
+                    "command": "extension.dopFormat",
+                    "group": "dophin@0",
+                    "when": "resourceLangId == css"
+                },
+                {
+                    "command": "extension.dopServer",
+                    "group": "dophin@1"
+                },
+                {
+                    "command": "extension.dopCompile",
+                    "group": "dophin@2"
+                },
+                {
+                    "command": "extension.dopDeploy",
+                    "group": "dophin@3"
+                }
+            ]
         }
     },
     "scripts": {
