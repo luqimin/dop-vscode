@@ -22,22 +22,22 @@ export function activate(context: vscode.ExtensionContext) {
     const osType = os.type();
 
     // dophin任务
-    const dophinTask = (taskName: string, projectName: string, cwd: string): void => {
-        dopOutput.appendLine(`正在执行: dop ${taskName} ${projectName}`);
+    const dophinTask = (taskName: string, projectName: string, cwd: string, extraOption: string = ''): void => {
+        dopOutput.appendLine(`正在执行: dop ${taskName} ${projectName} ${extraOption}`);
         vscode.window.withProgress({
             location: 10,
-            title: `正在执行: dop ${taskName} ${projectName}`,
+            title: `正在执行: dop ${taskName} ${projectName} ${extraOption}`,
         }, () => {
-            return tools.dophinTask(taskName, projectName, cwd).then((res) => {
+            return tools.dophinTask(taskName, projectName, cwd, extraOption).then((res) => {
                 dopOutput.append(res);
-                vscode.window.showInformationMessage(`dop ${taskName} ${projectName} 执行完成`, CONST.buttonName.showLog).then((selection) => {
+                vscode.window.showInformationMessage(`执行完成! dop ${taskName} ${projectName} ${extraOption}`, CONST.buttonName.showLog).then((selection) => {
                     if (selection === CONST.buttonName.showLog) {
                         dopOutput.show();
                     }
                 });
             }).catch((err) => {
                 dopOutput.append(err.message);
-                vscode.window.showErrorMessage(`执行错误! dop ${taskName} ${projectName}`, CONST.buttonName.showLog).then((selection) => {
+                vscode.window.showErrorMessage(`执行错误! dop ${taskName} ${projectName} ${extraOption}`, CONST.buttonName.showLog).then((selection) => {
                     if (selection === CONST.buttonName.showLog) {
                         dopOutput.show();
                     }
@@ -46,7 +46,8 @@ export function activate(context: vscode.ExtensionContext) {
         });
     };
 
-    const dophinCommand = (taskName: string, filedata: any, useFullpath?: boolean | undefined) => {
+    const dophinCommand = (taskName: string, filedata: any, options: any = {}) => {
+        const { useFullpath, extra } = options;
         // 判断不同context获取到的文件路径
         const fileStats = filedata && fs.statSync(filedata.path);
         let fileDir,
@@ -70,7 +71,7 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         if (projectName) {
-            dophinTask(taskName, useFullpath ? filedata.path : projectName, cwd);
+            dophinTask(taskName, useFullpath ? filedata.path : projectName, cwd, extra);
             return;
         }
 
@@ -81,7 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
             prompt: '项目名称',
         }).then((name) => {
             if (name) {
-                dophinTask(taskName, useFullpath ? filedata.path : name, cwd);
+                dophinTask(taskName, useFullpath ? filedata.path : name, cwd, extra);
             }
         })
     };
@@ -146,21 +147,39 @@ export function activate(context: vscode.ExtensionContext) {
 
     // dop compile
     let dopCompile = vscode.commands.registerCommand('extension.dopCompile', (filedata) => {
-        dophinCommand(CONST.taskName.compile, filedata);
+        vscode.window.showWarningMessage('是否立即编译静态文件?', CONST.buttonName.compileWithUglify, CONST.buttonName.compileWithoutUglify).then((selection) => {
+            switch (selection) {
+                case CONST.buttonName.compileWithUglify:
+                    dophinCommand(CONST.taskName.compile, filedata, { extra: '-e p' });
+                    break;
+                case CONST.buttonName.compileWithoutUglify:
+                    dophinCommand(CONST.taskName.compile, filedata);
+                    break;
+                default:
+                    break;
+            }
+        });
     });
 
     // dop deploy
     let dopDeploy = vscode.commands.registerCommand('extension.dopDeploy', (filedata) => {
-        vscode.window.showWarningMessage('是否立即部署静态文件?', CONST.buttonName.confirmBtn).then((selection) => {
-            if (selection === CONST.buttonName.confirmBtn) {
-                dophinCommand(CONST.taskName.deploy, filedata);
+        vscode.window.showWarningMessage('是否立即部署静态文件?', CONST.buttonName.deployWithUglify, CONST.buttonName.deployWithoutUglify).then((selection) => {
+            switch (selection) {
+                case CONST.buttonName.deployWithUglify:
+                    dophinCommand(CONST.taskName.deploy, filedata, { extra: '-e p' });
+                    break;
+                case CONST.buttonName.deployWithoutUglify:
+                    dophinCommand(CONST.taskName.deploy, filedata);
+                    break;
+                default:
+                    break;
             }
         });
     });
 
     // dop format
     let dopFormat = vscode.commands.registerCommand('extension.dopFormat', (filedata) => {
-        dophinCommand(CONST.taskName.format, filedata, true);
+        dophinCommand(CONST.taskName.format, filedata, { useFullpath: true });
     });
 
     context.subscriptions.push(dopServer, dopCompile, dopDeploy, dopFormat);
