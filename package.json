@@ -2,7 +2,7 @@
     "name": "dophin",
     "displayName": "dop",
     "description": "The way to use dop grafully",
-    "version": "0.5.2",
+    "version": "0.5.4",
     "repository": {
         "type": "git",
         "url": "https://github.com/luqimin/dop-vscode"
@@ -50,6 +50,14 @@
                 {
                     "command": "extension.dopFormat",
                     "when": "resourceLangId == css"
+                },
+                {
+                    "command": "extension.dopFormat",
+                    "when": "resourceLangId == scss"
+                },
+                {
+                    "command": "extension.dopFormat",
+                    "when": "resourceLangId == less"
                 }
             ],
             "explorer/context": [
@@ -57,6 +65,16 @@
                     "command": "extension.dopFormat",
                     "group": "dophin@0",
                     "when": "resourceLangId == css"
+                },
+                {
+                    "command": "extension.dopFormat",
+                    "group": "dophin@0",
+                    "when": "resourceLangId == scss"
+                },
+                {
+                    "command": "extension.dopFormat",
+                    "group": "dophin@0",
+                    "when": "resourceLangId == less"
                 },
                 {
                     "command": "extension.dopServer",
@@ -76,6 +94,16 @@
                     "command": "extension.dopFormat",
                     "group": "dophin@0",
                     "when": "resourceLangId == css"
+                },
+                {
+                    "command": "extension.dopFormat",
+                    "group": "dophin@0",
+                    "when": "resourceLangId == scss"
+                },
+                {
+                    "command": "extension.dopFormat",
+                    "group": "dophin@0",
+                    "when": "resourceLangId == less"
                 },
                 {
                     "command": "extension.dopServer",

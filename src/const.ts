@@ -31,10 +31,10 @@ const CONST: ConstantVariable = {
         showLog: '查看日志',
         confirmBtn: '确认',
         disposeWarning: '销毁当前终端',
-        deployWithUglify: '部署(混淆)',
-        deployWithoutUglify: '部署(不混淆)',
-        compileWithUglify: '编译(混淆)',
-        compileWithoutUglify: '编译(不混淆)',
+        deployWithUglify: '部署(压缩)',
+        deployWithoutUglify: '部署(不压缩)',
+        compileWithUglify: '编译(压缩)',
+        compileWithoutUglify: '编译(不压缩)',
     }
 };
 
