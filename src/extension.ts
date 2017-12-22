@@ -46,7 +46,7 @@ export function activate(context: vscode.ExtensionContext) {
         });
     };
 
-    const dophinCommand = (taskName: string, filedata: any, options: any = {}) => {
+    const dophinCommand = async (taskName: string, filedata: any, options: any = {}) => {
         const { useFullpath, extra } = options;
         // 判断不同context获取到的文件路径
         const fileStats = filedata && fs.statSync(filedata.path);
@@ -70,16 +70,28 @@ export function activate(context: vscode.ExtensionContext) {
             dopOutput = vscode.window.createOutputChannel('dophin');
         }
 
-        if (projectName) {
+        // 获取deploy任务名数组
+        let deployTaskArray: string[];
+        if (taskName === CONST.taskName.deploy) {
+            deployTaskArray = await tools.getDeployTaskName(filedata && filedata.path);
+        }
+
+        if (projectName && (taskName === CONST.taskName.deploy && deployTaskArray.indexOf(projectName) !== -1 || taskName !== CONST.taskName.deploy)) {
             dophinTask(taskName, useFullpath ? filedata.path : projectName, cwd, extra);
             return;
         }
 
         // 如果获取不到项目名, 则弹出input对话框
-        const projectArray = tools.getAllprojects(filedata && filedata.path);
+        let projectArray: string[];
+        if (taskName === CONST.taskName.deploy) {
+            projectArray = deployTaskArray;
+        } else {
+            projectArray = tools.getAllprojects(filedata && filedata.path);
+        }
+
         vscode.window.showQuickPick(projectArray, {
             placeHolder: '请选择您的项目名称',
-            ignoreFocusOut: true,
+            ignoreFocusOut: false,
         }).then((name) => {
             name && dophinTask(taskName, useFullpath ? filedata.path : name, cwd, extra);
         });
@@ -115,13 +127,14 @@ export function activate(context: vscode.ExtensionContext) {
 
         // 启动服务方法
         const startServer = (name: string): void => {
-            dopTerminal = vscode.window.createTerminal('dophin');
-            dopTerminal.show();
-
             vscode.window.showInformationMessage('请选择dophin本地服务监听端口号', '80', '6666').then((port) => {
                 if (!port) {
                     return;
                 }
+
+                dopTerminal = vscode.window.createTerminal('dophin');
+                dopTerminal.show();
+
                 if (port == '80') {
                     if (osType === 'Windows_NT') {
                         dopTerminal.sendText(`dop server ${name}`);
@@ -146,7 +159,7 @@ export function activate(context: vscode.ExtensionContext) {
             const projectArray = tools.getAllprojects(filedata && filedata.path);
             vscode.window.showQuickPick(projectArray, {
                 placeHolder: '请选择您的项目名称',
-                ignoreFocusOut: true,
+                ignoreFocusOut: false,
             }).then((name) => {
                 name && startServer(name);
             });

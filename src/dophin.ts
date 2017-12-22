@@ -6,18 +6,52 @@ import * as vscode from 'vscode';
 interface DophinTools {
     getProjectName: (path: string) => string;
     getAllprojects: (path: string) => string[];
+    getDeployTaskName: (path: string) => Promise<string[]>;
     dophinTask: (taskname: string, name: string, cwd: string, extraOption: string) => Promise<string>;
 }
 
-let projectArrCache: string[];
+let projectArrCache: string[],
+    deployTaskNameCache: string[];
+
+// 获取do.config.js文件位置
+const getConfig = (curPath: string): string => {
+    let configFilePath: string;
+    const currentFiles: string[] = fs.readdirSync(curPath);
+    for (const file of currentFiles) {
+        if (file === 'do.config.js') {
+            return path.resolve(curPath, file);
+        }
+    }
+    return configFilePath;
+};
+// 往上级查找config文件
+const findConfigFile = (curPath: string, cb?: (res: string) => void) => {
+    if (!curPath || curPath === '/' || curPath.length < 5) {
+        cb && cb('');
+    }
+    const curConfig = getConfig(curPath);
+    if (curConfig) {
+        cb && cb(curConfig);
+    } else {
+        findConfigFile(path.resolve(curPath, '../'), cb);
+    }
+};
+
+const asyncFindConfigFile = (curPath: string): Promise<string> => {
+    return new Promise((resolve, reject) => {
+        findConfigFile(curPath, (res) => {
+            resolve(res);
+        });
+    });
+}
 
 const dophinTools: DophinTools = {
-    getProjectName(_path = '') {
+    getProjectName(_path: string = '') {
         const reg = /project\/([\w-]+)/;
         const regResult = reg.exec(_path);
         return regResult && regResult[1] || '';
     },
-    getAllprojects(_path) {
+    getAllprojects(_path: string) {
         if (projectArrCache) {
             return projectArrCache;
         }
@@ -38,6 +72,18 @@ const dophinTools: DophinTools = {
         projectArr = dirs.filter((dir) => dir.indexOf('.') === -1);
         projectArrCache = projectArr;
         return projectArr;
+    },
+    async getDeployTaskName(_path: string = vscode.workspace.rootPath) {
+        if (deployTaskNameCache) {
+            return deployTaskNameCache;
+        }
+        if (fs.statSync(_path).isFile()) {
+            _path = path.dirname(_path);
+        }
+        const globalConfigFile = await asyncFindConfigFile(_path);
+        const config = fs.existsSync(globalConfigFile) && require(globalConfigFile) || {};
+        const { deploy = {} } = config;
+        return Object.keys(deploy);
     },
     dophinTask(taskname, name, cwd, extraOption) {
         return new Promise((resolve, reject) => {
