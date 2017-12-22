@@ -14,6 +14,8 @@ interface ButtonName {
     deployWithoutUglify?: string;
     compileWithUglify?: string;
     compileWithoutUglify?: string;
+    confirmCloseTerminal?: string;
+    cancelCloseTerminal?: string;
 }
 
 interface ConstantVariable {
@@ -35,6 +37,8 @@ const CONST: ConstantVariable = {
         deployWithoutUglify: '部署(不压缩)',
         compileWithUglify: '编译(压缩)',
         compileWithoutUglify: '编译(不压缩)',
+        confirmCloseTerminal: '直接关闭终端',
+        cancelCloseTerminal: '取消',
     }
 };
 

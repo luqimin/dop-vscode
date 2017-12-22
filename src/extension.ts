@@ -76,15 +76,13 @@ export function activate(context: vscode.ExtensionContext) {
         }
 
         // 如果获取不到项目名, 则弹出input对话框
-        vscode.window.showInputBox({
+        const projectArray = tools.getAllprojects(filedata && filedata.path);
+        vscode.window.showQuickPick(projectArray, {
+            placeHolder: '请选择您的项目名称',
             ignoreFocusOut: true,
-            placeHolder: '请输入您的项目名称',
-            prompt: '项目名称',
         }).then((name) => {
-            if (name) {
-                dophinTask(taskName, useFullpath ? filedata.path : name, cwd, extra);
-            }
-        })
+            name && dophinTask(taskName, useFullpath ? filedata.path : name, cwd, extra);
+        });
     };
 
     // The command has been defined in the package.json file
@@ -119,11 +117,21 @@ export function activate(context: vscode.ExtensionContext) {
         const startServer = (name: string): void => {
             dopTerminal = vscode.window.createTerminal('dophin');
             dopTerminal.show();
-            if (osType === 'Windows_NT') {
-                dopTerminal.sendText(`dop server ${name}`);
-            } else {
-                dopTerminal.sendText(`sudo dop server ${name}`);
-            }
+
+            vscode.window.showInformationMessage('请选择dophin本地服务监听端口号', '80', '6666').then((port) => {
+                if (!port) {
+                    return;
+                }
+                if (port == '80') {
+                    if (osType === 'Windows_NT') {
+                        dopTerminal.sendText(`dop server ${name}`);
+                    } else {
+                        dopTerminal.sendText(`sudo dop server ${name}`);
+                    }
+                } else {
+                    dopTerminal.sendText(`dop server ${name} --port ${port}`);
+                }
+            });
             // dopTerminal被dispose时销毁当前变量
             vscode.window.onDidCloseTerminal((event) => {
                 if (dopTerminal) {
@@ -135,10 +143,10 @@ export function activate(context: vscode.ExtensionContext) {
         if (projectName) {
             startServer(projectName);
         } else {
-            vscode.window.showInputBox({
+            const projectArray = tools.getAllprojects(filedata && filedata.path);
+            vscode.window.showQuickPick(projectArray, {
+                placeHolder: '请选择您的项目名称',
                 ignoreFocusOut: true,
-                placeHolder: '请输入您的项目名称',
-                prompt: '项目名称',
             }).then((name) => {
                 name && startServer(name);
             });

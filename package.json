@@ -2,7 +2,7 @@
     "name": "dophin",
     "displayName": "dop",
     "description": "The way to use dop grafully",
-    "version": "0.5.4",
+    "version": "0.5.5",
     "repository": {
         "type": "git",
         "url": "https://github.com/luqimin/dop-vscode"
